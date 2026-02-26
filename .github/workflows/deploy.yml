@@ -8,6 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      DEPLOY_PATH: ~/creative-own.com/public_html/ryogisystems.creative-own.com
 
     steps:
       - name: Checkout
@@ -22,15 +24,9 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -p 10022 ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Create deploy directory
-        run: |
-          ssh -p 10022 -i ~/.ssh/id_ed25519 \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-            "mkdir -p ~/ryogisystems.creative-own.com/public_html"
-
       - name: Deploy via rsync
         run: |
           rsync -avz --delete \
             -e "ssh -p 10022 -i ~/.ssh/id_ed25519" \
             index.html style.css script.js asset/ \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/ryogisystems.creative-own.com/public_html/
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ env.DEPLOY_PATH }}/
