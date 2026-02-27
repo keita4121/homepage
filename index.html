@@ -219,40 +219,85 @@
         </section>
 
         <section id="contact" class="section contact">
-            <div class="container fade-in">
-                <div class="section-header text-center">
+            <div class="container">
+                <div class="section-header text-center fade-in">
                     <h2 class="section-title">Contact</h2>
                     <p class="section-subtitle">お問い合わせ・ご相談</p>
                 </div>
-                <div class="contact-content glass-card lg-width">
-                    <p class="contact-desc">プロジェクトのご相談、お見積りなど、お気軽にお問い合わせください。</p>
 
-                    <form class="contact-form">
-                        <div class="form-group">
-                            <label for="name">お名前 / 貴社名</label>
-                            <input type="text" id="name" name="name" required placeholder="例: 山田太郎 / 株式会社○○">
+                <!-- Speed Actions -->
+                <div class="speed-actions-container fade-in">
+                    <div class="speed-actions-tagline">
+                        <span>まずはお気軽にご相談ください。</span>
+                    </div>
+                    <div class="speed-actions-grid">
+                        <div class="speed-action-card glass-card">
+                            <span class="speed-badge">最短今日</span>
+                            <div class="speed-icon"><i data-lucide="calendar-check"></i></div>
+                            <h3>日程を即確定</h3>
+                            <p>空いている時間を選んで今すぐ予約。メールのやり取りゼロ。</p>
+                            <a href="#" class="btn btn-primary speed-cta-btn" id="calendarCta" target="_blank"
+                                rel="noopener">
+                                カレンダーで予約 <i data-lucide="arrow-right"></i>
+                            </a>
                         </div>
-                        <div class="form-group">
-                            <label for="email">メールアドレス</label>
-                            <input type="email" id="email" name="email" required placeholder="例: you@example.com">
+                        <div class="speed-action-card glass-card">
+                            <span class="speed-badge">リアルタイム</span>
+                            <div class="speed-icon"><i data-lucide="message-circle"></i></div>
+                            <h3>チャットで相談</h3>
+                            <p>テキストで気軽に相談スタート。数時間以内に返信します。</p>
+                            <button class="btn btn-primary speed-cta-btn" id="chatOpenBtn">
+                                今すぐ話す <i data-lucide="arrow-right"></i>
+                            </button>
                         </div>
-                        <div class="form-group">
-                            <label for="message">メッセージ</label>
-                            <textarea id="message" name="message" rows="5" required
-                                placeholder="ご相談内容をご記入ください"></textarea>
+                        <div class="speed-action-card glass-card">
+                            <span class="speed-badge">直接指名</span>
+                            <div class="speed-icon"><i data-lucide="user-check"></i></div>
+                            <h3>担当者を指名</h3>
+                            <p>得意分野でエンジニアを選んで直接予約。</p>
+                            <button class="btn btn-primary speed-cta-btn" id="engineerSelectBtn">
+                                担当者を選ぶ <i data-lucide="arrow-right"></i>
+                            </button>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block">送信する</button>
-                    </form>
-
-                    <div class="social-links">
-                        <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i
-                                data-lucide="github"></i></a>
-                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"
-                            aria-label="X (Twitter)"><i data-lucide="twitter"></i></a>
-                        <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"
-                            aria-label="LinkedIn"><i data-lucide="linkedin"></i></a>
                     </div>
                 </div>
+
+                <!-- OR Divider -->
+                <div class="contact-or-divider fade-in">
+                    <span>または、フォームで送る</span>
+                </div>
+
+                <div class="fade-in">
+                    <div class="contact-content glass-card lg-width">
+                        <p class="contact-desc">プロジェクトのご相談、お見積りなど、お気軽にお問い合わせください。</p>
+
+                        <form class="contact-form">
+                            <div class="form-group">
+                                <label for="name">お名前 / 貴社名</label>
+                                <input type="text" id="name" name="name" required placeholder="例: 山田太郎 / 株式会社○○">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">メールアドレス</label>
+                                <input type="email" id="email" name="email" required placeholder="例: you@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="message">メッセージ</label>
+                                <textarea id="message" name="message" rows="5" required
+                                    placeholder="ご相談内容をご記入ください"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">送信する</button>
+                        </form>
+
+                        <div class="social-links">
+                            <a href="https://github.com" target="_blank" rel="noopener noreferrer"
+                                aria-label="GitHub"><i data-lucide="github"></i></a>
+                            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"
+                                aria-label="X (Twitter)"><i data-lucide="twitter"></i></a>
+                            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"
+                                aria-label="LinkedIn"><i data-lucide="linkedin"></i></a>
+                        </div>
+                    </div>
+                </div><!-- fade-in -->
             </div>
         </section>
     </main>
@@ -302,10 +347,81 @@
             <div class="hearing-summary" id="hearingSummary" style="display:none;">
                 <h4>ヒアリング結果</h4>
                 <div class="summary-content" id="summaryContent"></div>
+                <!-- Speed Actions -->
+                <div class="summary-speed-section">
+                    <p class="summary-speed-label">次のアクション</p>
+                    <div class="summary-speed-grid">
+                        <a href="#" class="summary-speed-btn" id="summaryCalendarBtn" target="_blank" rel="noopener">
+                            <i data-lucide="calendar-check"></i>
+                            <span>日程を予約</span>
+                        </a>
+                        <button class="summary-speed-btn" id="summarySlackBtn">
+                            <i data-lucide="message-circle"></i>
+                            <span>チャットで相談</span>
+                        </button>
+                        <button class="summary-speed-btn" id="summaryEngineerBtn">
+                            <i data-lucide="user-check"></i>
+                            <span>担当者を指名</span>
+                        </button>
+                    </div>
+                </div>
                 <div class="summary-actions">
                     <button class="btn btn-primary" id="summaryCopy">内容をコピー</button>
                     <a href="#contact" class="btn btn-primary" id="summaryContact">この内容で問い合わせ</a>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Widget -->
+    <div class="chat-widget" id="chatWidget">
+        <div class="chat-panel glass-card" id="chatPanel">
+            <div class="chat-panel-header">
+                <div class="chat-panel-title">
+                    <div class="chat-avatar-sm"><i data-lucide="bot"></i></div>
+                    <div>
+                        <h4>チャットで相談</h4>
+                        <span class="chat-status">● 受付中</span>
+                    </div>
+                </div>
+                <button class="chat-panel-close" id="chatClose" aria-label="閉じる">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="chat-panel-body" id="chatPanelBody">
+                <div class="chat-welcome-msg">
+                    <div class="chat-bot-icon"><i data-lucide="bot"></i></div>
+                    <div class="chat-bubble bot">
+                        こんにちは！<br>お名前とメールアドレスを入力いただくと、Slackでリアルタイムにチャットできます。
+                    </div>
+                </div>
+            </div>
+            <div class="chat-panel-form" id="chatPanelForm">
+                <input type="text" id="chatName" placeholder="お名前 / 貴社名" class="chat-input" required>
+                <input type="email" id="chatEmail" placeholder="メールアドレス" class="chat-input" required>
+                <textarea id="chatMessage" placeholder="ご相談内容をお書きください..." class="chat-textarea" rows="3"></textarea>
+                <button class="btn btn-primary chat-send-btn" id="chatSend">
+                    Slackで相談を始める <i data-lucide="send"></i>
+                </button>
+            </div>
+        </div>
+        <button class="chat-fab" id="chatFab" aria-label="チャットで相談">
+            <i data-lucide="message-circle" class="chat-fab-icon"></i>
+            <i data-lucide="x" class="chat-fab-close-icon"></i>
+        </button>
+    </div>
+
+    <!-- Engineer Nomination Modal -->
+    <div class="engineer-modal" id="engineerModal">
+        <div class="engineer-backdrop"></div>
+        <div class="engineer-dialog glass-card">
+            <button class="engineer-close" aria-label="閉じる">&times;</button>
+            <div class="engineer-modal-header">
+                <h3>担当者を選ぶ</h3>
+                <p>得意分野・実績から最適なエンジニアを選んでください</p>
+            </div>
+            <div class="engineer-grid" id="engineerGrid">
+                <!-- Populated by JS -->
             </div>
         </div>
     </div>

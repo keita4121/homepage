@@ -1,0 +1,9 @@
+name = "chat-slack-invite"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+SLACK_CHANNEL_ID = "C0AHHKCHW9G"
+ALLOWED_ORIGIN = "https://ryogisystems.creative-own.com"
+
+# SLACK_BOT_TOKEN は `wrangler secret put SLACK_BOT_TOKEN` で設定

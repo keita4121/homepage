@@ -3,6 +3,147 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Lucide Icons
     lucide.createIcons();
 
+    // ========== Speed Contact Config ==========
+    const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1476662302391533791/JNOq2NnNocZsz5EkFbe8mWjFFftsk9VfCTK_fzgFCA9pP_2WDspzIGyKw8XqdUglTqkz';
+    const SPEED_CONFIG = {
+        // Google Calendar > 予約スケジュールを作成 > リンクをコピー
+        calendarUrl: 'https://calendar.app.google/TCZAfFNHdBHifCQ16',
+    };
+
+    async function sendToDiscord(embed) {
+        const res = await fetch(DISCORD_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ embeds: [embed] }),
+        });
+        if (!res.ok) throw new Error(`Discord ${res.status}`);
+    }
+
+    const ENGINEERS = [
+        {
+            id: 'keita',
+            name: '板倉 慧汰',
+            role: '代表 / インフラ・AIエンジニア',
+            initial: '板',
+            bio: 'AI導入支援・AWSクラウドインフラ・Webアプリ開発のスペシャリスト。スタートアップから大手企業まで幅広いプロジェクト経験。',
+            specialties: ['AI導入支援', 'AWS', 'Python', 'Next.js', '技術顧問'],
+            calendarUrl: SPEED_CONFIG.calendarUrl,
+        },
+    ];
+
+    // Apply URLs to calendar buttons
+    const calendarCta = document.getElementById('calendarCta');
+    const summaryCalendarBtn = document.getElementById('summaryCalendarBtn');
+    if (calendarCta) calendarCta.href = SPEED_CONFIG.calendarUrl;
+    if (summaryCalendarBtn) summaryCalendarBtn.href = SPEED_CONFIG.calendarUrl;
+
+    // ========== Engineer Modal ==========
+    const engineerModal = document.getElementById('engineerModal');
+    const engineerGrid = document.getElementById('engineerGrid');
+
+    function renderEngineers() {
+        engineerGrid.innerHTML = ENGINEERS.map(eng => `
+            <div class="engineer-card glass-card">
+                <div class="engineer-avatar">${eng.initial}</div>
+                <h4 class="engineer-name">${eng.name}</h4>
+                <p class="engineer-role">${eng.role}</p>
+                <p class="engineer-bio">${eng.bio}</p>
+                <div class="engineer-tags">
+                    ${eng.specialties.map(s => `<span class="tag">${s}</span>`).join('')}
+                </div>
+                <a href="${eng.calendarUrl}" class="btn btn-primary engineer-book-btn" target="_blank" rel="noopener">
+                    この方と予約 <i data-lucide="calendar-check"></i>
+                </a>
+            </div>
+        `).join('');
+        lucide.createIcons();
+    }
+
+    function openEngineerModal() {
+        renderEngineers();
+        engineerModal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeEngineerModal() {
+        engineerModal.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    document.getElementById('engineerSelectBtn').addEventListener('click', openEngineerModal);
+    document.getElementById('summaryEngineerBtn').addEventListener('click', () => {
+        closeHearing();
+        setTimeout(openEngineerModal, 350);
+    });
+    engineerModal.querySelector('.engineer-backdrop').addEventListener('click', closeEngineerModal);
+    engineerModal.querySelector('.engineer-close').addEventListener('click', closeEngineerModal);
+
+    // ========== Chat Widget ==========
+    const CHAT_WORKER_URL = 'https://chat-slack-invite.intelligent-vermelho2.workers.dev';
+
+    const chatWidget = document.getElementById('chatWidget');
+    const chatPanelBody = document.getElementById('chatPanelBody');
+    const chatPanelForm = document.getElementById('chatPanelForm');
+
+    function openChat() {
+        chatWidget.classList.add('open');
+    }
+
+    function closeChat() {
+        chatWidget.classList.remove('open');
+    }
+
+    document.getElementById('chatFab').addEventListener('click', () => {
+        chatWidget.classList.toggle('open');
+    });
+    document.getElementById('chatClose').addEventListener('click', closeChat);
+
+    document.getElementById('chatOpenBtn').addEventListener('click', openChat);
+    document.getElementById('summarySlackBtn').addEventListener('click', () => {
+        closeHearing();
+        setTimeout(openChat, 350);
+    });
+
+    document.getElementById('chatSend').addEventListener('click', async () => {
+        const nameEl = document.getElementById('chatName');
+        const emailEl = document.getElementById('chatEmail');
+        const msgEl = document.getElementById('chatMessage');
+        const name = nameEl.value.trim();
+        const email = emailEl.value.trim();
+        const message = msgEl.value.trim();
+
+        nameEl.style.borderColor = '';
+        emailEl.style.borderColor = '';
+
+        if (!name) { nameEl.style.borderColor = 'rgba(239,68,68,0.7)'; nameEl.focus(); return; }
+        if (!email) { emailEl.style.borderColor = 'rgba(239,68,68,0.7)'; emailEl.focus(); return; }
+
+        const sendBtn = document.getElementById('chatSend');
+        sendBtn.textContent = '送信中...';
+        sendBtn.disabled = true;
+
+        try {
+            const res = await fetch(CHAT_WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, message }),
+            });
+
+            if (!res.ok) throw new Error(`Server ${res.status}`);
+
+            chatPanelForm.style.display = 'none';
+            const successEl = document.createElement('div');
+            successEl.className = 'chat-success-msg';
+            successEl.innerHTML = `<i data-lucide="check-circle"></i><span>Slackの招待を送信しました！<br>メールをご確認ください。</span>`;
+            chatPanelBody.appendChild(successEl);
+            lucide.createIcons();
+        } catch {
+            sendBtn.disabled = false;
+            sendBtn.textContent = '送信に失敗しました';
+            setTimeout(() => { sendBtn.innerHTML = 'Slackで相談を始める <i data-lucide="send"></i>'; lucide.createIcons(); }, 2500);
+        }
+    });
+
     // Header scroll effect
     const header = document.querySelector('.header');
     window.addEventListener('scroll', () => {
@@ -23,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         nav.classList.toggle('open');
         const isExpanded = hamburger.getAttribute('aria-expanded') === 'true';
         hamburger.setAttribute('aria-expanded', !isExpanded);
-        
+
         // Prevent body scroll when menu is open
         document.body.style.overflow = hamburger.classList.contains('active') ? 'hidden' : '';
     });
@@ -40,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Intersection Observer for fade-in animations
     const fadeElements = document.querySelectorAll('.fade-in');
-    
+
     const fadeObserverOptions = {
         root: null,
         rootMargin: '0px',
@@ -274,7 +415,6 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.querySelector('.hearing-backdrop').addEventListener('click', closeHearing);
 
     // Contact Form Submission
-    const CONTACT_API_URL = 'https://holly-hazardous-rca-something.trycloudflare.com/contact';
     const contactForm = document.querySelector('.contact-form');
     if (contactForm) {
         contactForm.addEventListener('submit', async (e) => {
@@ -291,20 +431,21 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const res = await fetch(CONTACT_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
+                await sendToDiscord({
+                    title: '📩 お問い合わせフォーム',
+                    color: 0x8b5cf6,
+                    fields: [
+                        { name: '👤 お名前 / 貴社名', value: data.name },
+                        { name: '📧 メールアドレス', value: data.email },
+                        { name: '📝 メッセージ', value: data.message },
+                    ],
+                    footer: { text: '両儀システムズ | お問い合わせフォーム' },
+                    timestamp: new Date().toISOString(),
                 });
-                const json = await res.json();
-                if (json.ok) {
-                    btn.textContent = '送信しました！';
-                    contactForm.reset();
-                    setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 3000);
-                } else {
-                    throw new Error(json.error || 'Error');
-                }
-            } catch (err) {
+                btn.textContent = '送信しました！';
+                contactForm.reset();
+                setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 3000);
+            } catch {
                 btn.textContent = '送信に失敗しました';
                 btn.disabled = false;
                 setTimeout(() => { btn.textContent = original; }, 3000);
