@@ -24,6 +24,10 @@ export default {
         return Response.json({ error: 'name and email are required' }, { status: 400, headers: corsHeaders });
       }
 
+      if (!env.SLACK_BOT_TOKEN || !env.SLACK_CHANNEL_ID) {
+        return Response.json({ error: 'Worker is not configured' }, { status: 500, headers: corsHeaders });
+      }
+
       // 1. Slack Connect招待を送信
       const inviteRes = await fetch('https://slack.com/api/conversations.inviteShared', {
         method: 'POST',
@@ -33,18 +37,31 @@ export default {
         },
         body: JSON.stringify({
           channel: env.SLACK_CHANNEL_ID,
-          emails: email,
+          emails: [email],
           external_limited: false,
         }),
       });
 
       const inviteData = await inviteRes.json();
 
-      if (!inviteData.ok) {
+      if (!inviteRes.ok || !inviteData.ok) {
         console.error('Slack invite failed:', inviteData.error);
+        const statusMap = {
+          already_in_team: 409,
+          already_invited: 409,
+          invalid_email: 400,
+          channel_not_found: 404,
+          method_not_supported_for_channel_type: 422,
+          email_domain_not_allowed: 403,
+          restricted_action: 403,
+          missing_scope: 500,
+          invalid_auth: 500,
+          not_allowed_token_type: 500,
+        };
+        const detail = inviteData.error || `http_${inviteRes.status}`;
         return Response.json(
-          { error: 'Slack invite failed', detail: inviteData.error },
-          { status: 502, headers: corsHeaders },
+          { error: 'Slack invite failed', detail },
+          { status: statusMap[detail] || 502, headers: corsHeaders },
         );
       }
 

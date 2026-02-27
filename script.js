@@ -104,6 +104,19 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(openChat, 350);
     });
 
+    function formatChatSubmitError(detail) {
+        const messages = {
+            invalid_email: 'メール形式を確認してください',
+            already_invited: 'このメールには既に招待済みです',
+            already_in_team: 'このメールは既に参加済みです',
+            method_not_supported_for_channel_type: 'Slack Connect設定を確認してください',
+            missing_scope: 'Slackアプリ権限を確認してください',
+            invalid_auth: 'Slackトークン設定を確認してください',
+            channel_not_found: 'Slackチャンネル設定を確認してください',
+        };
+        return messages[detail] || '送信に失敗しました';
+    }
+
     document.getElementById('chatSend').addEventListener('click', async () => {
         const nameEl = document.getElementById('chatName');
         const emailEl = document.getElementById('chatEmail');
@@ -129,7 +142,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ name, email, message }),
             });
 
-            if (!res.ok) throw new Error(`Server ${res.status}`);
+            let payload = null;
+            try {
+                payload = await res.json();
+            } catch {
+                payload = null;
+            }
+
+            if (!res.ok) {
+                throw new Error(payload?.detail || payload?.error || `server_${res.status}`);
+            }
 
             chatPanelForm.style.display = 'none';
             const successEl = document.createElement('div');
@@ -137,9 +159,11 @@ document.addEventListener('DOMContentLoaded', () => {
             successEl.innerHTML = `<i data-lucide="check-circle"></i><span>Slackの招待を送信しました！<br>メールをご確認ください。</span>`;
             chatPanelBody.appendChild(successEl);
             lucide.createIcons();
-        } catch {
+        } catch (err) {
+            console.error('Chat submit failed:', err);
+            const detail = err instanceof Error ? err.message : '';
             sendBtn.disabled = false;
-            sendBtn.textContent = '送信に失敗しました';
+            sendBtn.textContent = formatChatSubmitError(detail);
             setTimeout(() => { sendBtn.innerHTML = 'Slackで相談を始める <i data-lucide="send"></i>'; lucide.createIcons(); }, 2500);
         }
     });
