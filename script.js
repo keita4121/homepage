@@ -79,8 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
     engineerModal.querySelector('.engineer-close').addEventListener('click', closeEngineerModal);
 
     // ========== Chat Widget ==========
-    const CHAT_WORKER_URL = 'https://chat-slack-invite.intelligent-vermelho2.workers.dev';
-
     const chatWidget = document.getElementById('chatWidget');
     const chatPanelBody = document.getElementById('chatPanelBody');
     const chatPanelForm = document.getElementById('chatPanelForm');
@@ -105,16 +103,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function formatChatSubmitError(detail) {
-        const messages = {
-            invalid_email: 'メール形式を確認してください',
-            already_invited: 'このメールには既に招待済みです',
-            already_in_team: 'このメールは既に参加済みです',
-            method_not_supported_for_channel_type: 'Slack Connect設定を確認してください',
-            missing_scope: 'Slackアプリ権限を確認してください',
-            invalid_auth: 'Slackトークン設定を確認してください',
-            channel_not_found: 'Slackチャンネル設定を確認してください',
-        };
-        return messages[detail] || '送信に失敗しました';
+        if (!detail) return '送信に失敗しました';
+        if (detail.includes('Discord 429')) return '混み合っています。少し待って再試行してください';
+        if (detail.includes('Discord 401') || detail.includes('Discord 403')) return '通知設定に問題があります';
+        return '送信に失敗しました';
     }
 
     document.getElementById('chatSend').addEventListener('click', async () => {
@@ -136,30 +128,21 @@ document.addEventListener('DOMContentLoaded', () => {
         sendBtn.disabled = true;
 
         try {
-            const res = await fetch(CHAT_WORKER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, message }),
+            await sendToDiscord({
+                title: '💬 チャット相談',
+                color: 0x3b82f6,
+                fields: [
+                    { name: '👤 お名前 / 貴社名', value: name },
+                    { name: '📧 メールアドレス', value: email },
+                    { name: '📝 ご相談内容', value: message || '(未記入)' },
+                ],
+                footer: { text: '両儀システムズ | チャット相談' },
+                timestamp: new Date().toISOString(),
             });
-
-            let payload = null;
-            try {
-                payload = await res.json();
-            } catch {
-                payload = null;
-            }
-
-            if (!res.ok) {
-                throw new Error(payload?.detail || payload?.error || `server_${res.status}`);
-            }
-
-            const isDmFallback = payload?.mode === 'dm_fallback';
             chatPanelForm.style.display = 'none';
             const successEl = document.createElement('div');
             successEl.className = 'chat-success-msg';
-            successEl.innerHTML = isDmFallback
-                ? `<i data-lucide="check-circle"></i><span>担当者へDMで通知しました。<br>招待リンクを個別にご案内します。</span>`
-                : `<i data-lucide="check-circle"></i><span>Slackの招待を送信しました！<br>メールをご確認ください。</span>`;
+            successEl.innerHTML = `<i data-lucide="check-circle"></i><span>Discordに通知しました。<br>担当者よりメールでご連絡します。</span>`;
             chatPanelBody.appendChild(successEl);
             lucide.createIcons();
         } catch (err) {
@@ -167,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const detail = err instanceof Error ? err.message : '';
             sendBtn.disabled = false;
             sendBtn.textContent = formatChatSubmitError(detail);
-            setTimeout(() => { sendBtn.innerHTML = 'Slackで相談を始める <i data-lucide="send"></i>'; lucide.createIcons(); }, 2500);
+            setTimeout(() => { sendBtn.innerHTML = 'Discordで相談を送信 <i data-lucide="send"></i>'; lucide.createIcons(); }, 2500);
         }
     });
 
