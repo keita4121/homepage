@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Admin</title>
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Chat Admin</h1>
+    <div class="token-box">
+      <input id="adminToken" type="password" placeholder="ADMIN_TOKEN">
+      <button id="saveTokenBtn" type="button">Save</button>
+      <button id="refreshBtn" type="button">Refresh</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sessions">
+      <div class="sessions-head">
+        <h2>Sessions</h2>
+        <span id="sessionCount">0</span>
+      </div>
+      <ul id="sessionList"></ul>
+    </aside>
+
+    <section class="chat-panel">
+      <div class="chat-meta" id="chatMeta">セッションを選択してください</div>
+      <div class="chat-log" id="chatLog"></div>
+
+      <div class="chat-actions">
+        <button id="toggleCloseBtn" type="button" disabled>Close Session</button>
+      </div>
+
+      <form id="replyForm" class="reply-form">
+        <textarea id="replyInput" rows="3" placeholder="返信メッセージを入力..." required></textarea>
+        <button id="replySendBtn" type="submit" disabled>Send</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="/admin.js"></script>
+</body>
+</html>

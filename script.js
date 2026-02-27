@@ -79,20 +79,240 @@ document.addEventListener('DOMContentLoaded', () => {
     engineerModal.querySelector('.engineer-close').addEventListener('click', closeEngineerModal);
 
     // ========== Chat Widget ==========
+    const CHAT_API_BASE = (window.CHAT_API_BASE || '').replace(/\/$/, '');
+    const CHAT_STORAGE_KEY = 'ryogi_chat_session_v1';
+    const CHAT_POLL_INTERVAL_MS = 2500;
+
     const chatWidget = document.getElementById('chatWidget');
     const chatPanelBody = document.getElementById('chatPanelBody');
-    const chatPanelForm = document.getElementById('chatPanelForm');
+    const chatMessagesEl = document.getElementById('chatMessages');
+    const chatNameEl = document.getElementById('chatName');
+    const chatEmailEl = document.getElementById('chatEmail');
+    const chatMessageEl = document.getElementById('chatMessage');
+    const chatSendBtn = document.getElementById('chatSend');
+
+    const chatState = {
+        sessionId: null,
+        name: '',
+        email: '',
+        lastMessageId: 0,
+        displayedMessageIds: new Set(),
+        pollTimer: null,
+        syncing: false,
+        closed: false,
+    };
 
     function openChat() {
         chatWidget.classList.add('open');
+        if (chatState.sessionId) void syncChatMessages();
     }
 
     function closeChat() {
         chatWidget.classList.remove('open');
     }
 
+    function updateChatSendButtonIdle() {
+        const label = chatState.sessionId ? 'メッセージ送信' : 'チャットを開始';
+        chatSendBtn.innerHTML = `${label} <i data-lucide="send"></i>`;
+        lucide.createIcons();
+    }
+
+    function lockChatIdentityInputs() {
+        chatNameEl.disabled = true;
+        chatEmailEl.disabled = true;
+    }
+
+    function unlockChatIdentityInputs() {
+        chatNameEl.disabled = false;
+        chatEmailEl.disabled = false;
+    }
+
+    function enableChatMessageInput() {
+        chatState.closed = false;
+        chatMessageEl.disabled = false;
+        chatMessageEl.placeholder = 'ご相談内容をお書きください...';
+        chatSendBtn.disabled = false;
+        updateChatSendButtonIdle();
+    }
+
+    function closeChatSessionUi() {
+        chatState.closed = true;
+        chatMessageEl.disabled = true;
+        chatMessageEl.placeholder = 'このセッションは終了しました';
+        chatSendBtn.disabled = true;
+        chatSendBtn.textContent = 'セッション終了';
+    }
+
+    function saveChatState() {
+        try {
+            localStorage.setItem(
+                CHAT_STORAGE_KEY,
+                JSON.stringify({
+                    sessionId: chatState.sessionId,
+                    name: chatState.name,
+                    email: chatState.email,
+                    lastMessageId: chatState.lastMessageId,
+                }),
+            );
+        } catch {
+            // ignore
+        }
+    }
+
+    function clearChatState() {
+        chatState.sessionId = null;
+        chatState.name = '';
+        chatState.email = '';
+        chatState.lastMessageId = 0;
+        chatState.displayedMessageIds.clear();
+        chatState.closed = false;
+        chatMessagesEl.innerHTML = '';
+        unlockChatIdentityInputs();
+        enableChatMessageInput();
+        if (chatState.pollTimer) {
+            clearInterval(chatState.pollTimer);
+            chatState.pollTimer = null;
+        }
+        try {
+            localStorage.removeItem(CHAT_STORAGE_KEY);
+        } catch {
+            // ignore
+        }
+    }
+
+    function loadChatState() {
+        try {
+            const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+            if (!raw) return;
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === 'object') {
+                chatState.sessionId = typeof parsed.sessionId === 'string' ? parsed.sessionId : null;
+                chatState.name = typeof parsed.name === 'string' ? parsed.name : '';
+                chatState.email = typeof parsed.email === 'string' ? parsed.email : '';
+                chatState.lastMessageId = 0;
+            }
+        } catch {
+            // ignore
+        }
+    }
+
+    function formatChatTime(iso) {
+        if (!iso) return '';
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return '';
+        return d.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+
+    function appendChatMessage(message) {
+        if (!message || !message.id || chatState.displayedMessageIds.has(message.id)) return;
+        if (message.sender !== 'visitor' && message.sender !== 'agent') return;
+
+        const row = document.createElement('div');
+        row.className = `chat-msg-row ${message.sender === 'visitor' ? 'visitor' : 'agent'}`;
+
+        const bubble = document.createElement('div');
+        bubble.className = `chat-bubble ${message.sender === 'visitor' ? 'visitor' : 'agent'}`;
+        bubble.textContent = message.text || '';
+
+        const time = document.createElement('div');
+        time.className = 'chat-msg-time';
+        time.textContent = formatChatTime(message.at);
+
+        row.appendChild(bubble);
+        row.appendChild(time);
+        chatMessagesEl.appendChild(row);
+        chatPanelBody.scrollTop = chatPanelBody.scrollHeight;
+
+        chatState.displayedMessageIds.add(message.id);
+        chatState.lastMessageId = Math.max(chatState.lastMessageId, message.id);
+    }
+
+    async function chatApi(path, options = {}) {
+        if (!CHAT_API_BASE) throw new Error('chat_api_base_not_configured');
+        const res = await fetch(`${CHAT_API_BASE}${path}`, {
+            method: options.method || 'GET',
+            headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+            body: options.body || null,
+        });
+
+        let payload = null;
+        try {
+            payload = await res.json();
+        } catch {
+            payload = null;
+        }
+
+        if (!res.ok) {
+            throw new Error(payload?.error || `http_${res.status}`);
+        }
+        return payload || {};
+    }
+
+    function formatChatSubmitError(detail) {
+        if (!detail) return '送信に失敗しました';
+        if (detail === 'chat_api_base_not_configured') return 'チャット接続先が未設定です';
+        if (detail === 'name_and_email_required') return 'お名前とメールアドレスは必須です';
+        if (detail === 'invalid_email') return 'メール形式を確認してください';
+        if (detail === 'text_required') return 'メッセージを入力してください';
+        if (detail === 'session_not_found') return 'セッションが期限切れです。もう一度開始してください';
+        if (detail === 'session_closed') return 'このセッションは終了しています';
+        if (detail.includes('Failed to fetch') || detail.includes('NetworkError')) return 'チャットサーバーに接続できません';
+        return '送信に失敗しました';
+    }
+
+    async function createChatSession(name, email) {
+        const payload = await chatApi('/api/chat/session', {
+            method: 'POST',
+            body: JSON.stringify({
+                name,
+                email,
+                source: 'website',
+            }),
+        });
+
+        chatState.sessionId = payload.sessionId;
+        chatState.name = name;
+        chatState.email = email;
+        saveChatState();
+        lockChatIdentityInputs();
+        enableChatMessageInput();
+    }
+
+    async function syncChatMessages() {
+        if (!chatState.sessionId || chatState.syncing) return;
+        chatState.syncing = true;
+        try {
+            const params = new URLSearchParams({
+                sessionId: chatState.sessionId,
+                after: String(chatState.lastMessageId),
+            });
+            const payload = await chatApi(`/api/chat/messages?${params.toString()}`);
+            const messages = Array.isArray(payload.messages) ? payload.messages : [];
+            messages.forEach((message) => appendChatMessage(message));
+            if (payload.closed) {
+                closeChatSessionUi();
+            }
+            saveChatState();
+        } catch (err) {
+            const detail = err instanceof Error ? err.message : '';
+            if (detail === 'session_not_found') {
+                clearChatState();
+            }
+        } finally {
+            chatState.syncing = false;
+        }
+    }
+
+    function startChatPolling() {
+        if (chatState.pollTimer || !chatState.sessionId) return;
+        chatState.pollTimer = setInterval(() => {
+            void syncChatMessages();
+        }, CHAT_POLL_INTERVAL_MS);
+    }
+
     document.getElementById('chatFab').addEventListener('click', () => {
         chatWidget.classList.toggle('open');
+        if (chatWidget.classList.contains('open') && chatState.sessionId) void syncChatMessages();
     });
     document.getElementById('chatClose').addEventListener('click', closeChat);
 
@@ -102,57 +322,76 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(openChat, 350);
     });
 
-    function formatChatSubmitError(detail) {
-        if (!detail) return '送信に失敗しました';
-        if (detail.includes('Discord 429')) return '混み合っています。少し待って再試行してください';
-        if (detail.includes('Discord 401') || detail.includes('Discord 403')) return '通知設定に問題があります';
-        return '送信に失敗しました';
-    }
+    chatSendBtn.addEventListener('click', async () => {
+        const name = chatNameEl.value.trim();
+        const email = chatEmailEl.value.trim();
+        const message = chatMessageEl.value.trim();
 
-    document.getElementById('chatSend').addEventListener('click', async () => {
-        const nameEl = document.getElementById('chatName');
-        const emailEl = document.getElementById('chatEmail');
-        const msgEl = document.getElementById('chatMessage');
-        const name = nameEl.value.trim();
-        const email = emailEl.value.trim();
-        const message = msgEl.value.trim();
+        chatNameEl.style.borderColor = '';
+        chatEmailEl.style.borderColor = '';
+        chatMessageEl.style.borderColor = '';
 
-        nameEl.style.borderColor = '';
-        emailEl.style.borderColor = '';
+        if (!name) { chatNameEl.style.borderColor = 'rgba(239,68,68,0.7)'; chatNameEl.focus(); return; }
+        if (!email) { chatEmailEl.style.borderColor = 'rgba(239,68,68,0.7)'; chatEmailEl.focus(); return; }
+        if (!message) { chatMessageEl.style.borderColor = 'rgba(239,68,68,0.7)'; chatMessageEl.focus(); return; }
+        if (chatState.closed) return;
 
-        if (!name) { nameEl.style.borderColor = 'rgba(239,68,68,0.7)'; nameEl.focus(); return; }
-        if (!email) { emailEl.style.borderColor = 'rgba(239,68,68,0.7)'; emailEl.focus(); return; }
-
-        const sendBtn = document.getElementById('chatSend');
-        sendBtn.textContent = '送信中...';
-        sendBtn.disabled = true;
+        chatSendBtn.textContent = '送信中...';
+        chatSendBtn.disabled = true;
 
         try {
-            await sendToDiscord({
-                title: '💬 チャット相談',
-                color: 0x3b82f6,
-                fields: [
-                    { name: '👤 お名前 / 貴社名', value: name },
-                    { name: '📧 メールアドレス', value: email },
-                    { name: '📝 ご相談内容', value: message || '(未記入)' },
-                ],
-                footer: { text: '両儀システムズ | チャット相談' },
-                timestamp: new Date().toISOString(),
+            if (!chatState.sessionId) {
+                await createChatSession(name, email);
+                startChatPolling();
+            }
+
+            const payload = await chatApi('/api/chat/message', {
+                method: 'POST',
+                body: JSON.stringify({
+                    sessionId: chatState.sessionId,
+                    text: message,
+                }),
             });
-            chatPanelForm.style.display = 'none';
-            const successEl = document.createElement('div');
-            successEl.className = 'chat-success-msg';
-            successEl.innerHTML = `<i data-lucide="check-circle"></i><span>Discordに通知しました。<br>担当者よりメールでご連絡します。</span>`;
-            chatPanelBody.appendChild(successEl);
-            lucide.createIcons();
+            if (payload.message) appendChatMessage(payload.message);
+            chatMessageEl.value = '';
+            await syncChatMessages();
+            updateChatSendButtonIdle();
         } catch (err) {
             console.error('Chat submit failed:', err);
             const detail = err instanceof Error ? err.message : '';
-            sendBtn.disabled = false;
-            sendBtn.textContent = formatChatSubmitError(detail);
-            setTimeout(() => { sendBtn.innerHTML = 'Discordで相談を送信 <i data-lucide="send"></i>'; lucide.createIcons(); }, 2500);
+            if (detail === 'session_not_found') {
+                clearChatState();
+            }
+            if (detail === 'session_closed') {
+                closeChatSessionUi();
+                return;
+            }
+            chatSendBtn.disabled = false;
+            chatSendBtn.textContent = formatChatSubmitError(detail);
+            setTimeout(() => {
+                if (!chatState.closed) updateChatSendButtonIdle();
+            }, 2500);
         }
     });
+
+    chatMessageEl.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            chatSendBtn.click();
+        }
+    });
+
+    loadChatState();
+    if (chatState.sessionId) {
+        chatNameEl.value = chatState.name;
+        chatEmailEl.value = chatState.email;
+        lockChatIdentityInputs();
+        enableChatMessageInput();
+        startChatPolling();
+        void syncChatMessages();
+    } else {
+        updateChatSendButtonIdle();
+    }
 
     // Header scroll effect
     const header = document.querySelector('.header');

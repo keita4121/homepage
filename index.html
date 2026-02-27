@@ -392,16 +392,17 @@
                 <div class="chat-welcome-msg">
                     <div class="chat-bot-icon"><i data-lucide="bot"></i></div>
                     <div class="chat-bubble bot">
-                        こんにちは！<br>お名前とメールアドレスを入力いただくと、Discordへ相談内容を通知します。
+                        こんにちは！<br>お名前とメールアドレスを入力いただくと、担当者と直接チャットを開始できます。
                     </div>
                 </div>
+                <div class="chat-message-list" id="chatMessages"></div>
             </div>
             <div class="chat-panel-form" id="chatPanelForm">
                 <input type="text" id="chatName" placeholder="お名前 / 貴社名" class="chat-input" required>
                 <input type="email" id="chatEmail" placeholder="メールアドレス" class="chat-input" required>
                 <textarea id="chatMessage" placeholder="ご相談内容をお書きください..." class="chat-textarea" rows="3"></textarea>
                 <button class="btn btn-primary chat-send-btn" id="chatSend">
-                    Discordで相談を送信 <i data-lucide="send"></i>
+                    チャットを開始 <i data-lucide="send"></i>
                 </button>
             </div>
         </div>
@@ -426,7 +427,10 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        window.CHAT_API_BASE = 'https://chat.ryogisystems.creative-own.com';
+    </script>
+    <script src="script.js?v=20260227-2"></script>
 </body>
 
 </html>

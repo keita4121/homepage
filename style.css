@@ -1439,7 +1439,11 @@ img.profile-name {
 .chat-panel-body {
     padding: 16px;
     overflow-y: auto;
-    min-height: 80px;
+    min-height: 180px;
+    max-height: 340px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .chat-welcome-msg {
@@ -1481,6 +1485,50 @@ img.profile-name {
     color: var(--text-main);
 }
 
+.chat-message-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.chat-msg-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-width: 84%;
+}
+
+.chat-msg-row.visitor {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.chat-msg-row.agent {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+.chat-bubble.visitor {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: 1px solid rgba(59, 130, 246, 0.45);
+    border-top-right-radius: 4px;
+    color: #ffffff;
+}
+
+.chat-bubble.agent {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid var(--border-color);
+    border-top-left-radius: 4px;
+    color: var(--text-main);
+}
+
+.chat-msg-time {
+    font-size: 0.68rem;
+    color: var(--text-sub);
+    opacity: 0.8;
+    padding: 0 4px;
+}
+
 .chat-panel-form {
     padding: 12px 16px 16px;
     border-top: 1px solid var(--border-color);
@@ -1508,6 +1556,11 @@ img.profile-name {
     outline: none;
     border-color: var(--primary-start);
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.chat-input:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
 }
 
 .chat-send-btn {
