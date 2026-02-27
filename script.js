@@ -153,10 +153,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(payload?.detail || payload?.error || `server_${res.status}`);
             }
 
+            const isDmFallback = payload?.mode === 'dm_fallback';
             chatPanelForm.style.display = 'none';
             const successEl = document.createElement('div');
             successEl.className = 'chat-success-msg';
-            successEl.innerHTML = `<i data-lucide="check-circle"></i><span>Slackの招待を送信しました！<br>メールをご確認ください。</span>`;
+            successEl.innerHTML = isDmFallback
+                ? `<i data-lucide="check-circle"></i><span>担当者へDMで通知しました。<br>招待リンクを個別にご案内します。</span>`
+                : `<i data-lucide="check-circle"></i><span>Slackの招待を送信しました！<br>メールをご確認ください。</span>`;
             chatPanelBody.appendChild(successEl);
             lucide.createIcons();
         } catch (err) {
