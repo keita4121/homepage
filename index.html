@@ -4,8 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>両儀システムズ - Web等開発・システムコンサルティング</title>
-    <meta name="description" content="クラウド×AIの力で、あなたのビジネスを加速する。両儀システムズはWeb開発、AI導入支援、技術顧問を提供するITプロフェッショナルです。">
+    <title>両儀システムズ | AI導入支援・Web開発・システムコンサルティング</title>
+    <meta name="description"
+        content="両儀システムズは、AI導入支援、モダンなWebアプリケーション開発、ITインフラ構築、技術顧問を提供するITプロフェッショナルです。クラウド×AIの力で、あなたのビジネスを本質から加速させます。">
+    <meta property="og:title" content="両儀システムズ | AI導入支援・Web開発・システムコンサルティング">
+    <meta property="og:description" content="両儀システムズは、AI導入支援、モダンなWebアプリケーション開発、ITインフラ構築、技術顧問を提供するITプロフェッショナルです。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ryogisystems.creative-own.com/">
+    <meta property="og:image" content="https://ryogisystems.creative-own.com/asset/picture/両儀3.png">
+    <meta name="twitter:card" content="summary_large_image">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,6 +22,21 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="style.css">
+    <!-- Schema.org Markup -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "両儀システムズ",
+      "url": "https://ryogisystems.creative-own.com/",
+      "logo": "https://ryogisystems.creative-own.com/asset/picture/両儀3.png",
+      "description": "両儀システムズは、AI導入支援、モダンなWebアプリケーション開発、ITインフラ構築、技術顧問を提供するITプロフェッショナルです。",
+      "founder": {
+        "@type": "Person",
+        "name": "板倉 慧汰"
+      }
+    }
+    </script>
 </head>
 
 <body>
@@ -49,8 +71,11 @@
 
             <div class="container hero-inner fade-in">
                 <!-- ユーザー指定の透過筆文字画像 -->
-                <img src="asset/picture/両儀3.png" alt="両儀" class="hero-calligraphy-img">
-                <h1 class="hero-title">クラウド×AIの力で、<br>あなたのビジネスを加速する</h1>
+                <img src="asset/picture/両儀3.png" alt="両儀システムズ" class="hero-calligraphy-img">
+                <h1 class="hero-title">
+                    <span class="sr-only">両儀システムズ | AI導入支援・Web開発に関するご相談</span>
+                    クラウド×AIの力で、<br>あなたのビジネスを加速する
+                </h1>
                 <p class="hero-description">最新の技術力で、<br>企業とユーザーを繋ぐ最適なソリューションを提供します。</p>
                 <div class="hero-actions">
                     <a href="#contact" class="btn btn-primary">お問い合わせ<i data-lucide="arrow-right"></i></a>
@@ -76,7 +101,7 @@
                     <div class="profile">
                         <div class="profile-info">
                             <p class="profile-title">代表</p>
-                            <img src="asset/picture/両儀4.png" alt="板倉 慧汰" class="profile-name">
+                            <img src="asset/picture/両儀4.png" alt="代表 板倉 慧汰" class="profile-name" loading="lazy">
                             <p class="profile-bio">インフラエンジニア /
                                 ITコンサルタント。スタートアップや大手企業での開発経験を経て独立。使いやすさと高いパフォーマンスを両立したシステム構築を得意とする。</p>
                         </div>
@@ -127,9 +152,9 @@
                         <h3 class="work-title">iPhone/Androidアプリケーション開発</h3>
                         <p class="work-desc">カスタマー向けの直感的に操作できる飲食店検索アプリケーション。生成AIを利用した高度なサジェスト機能と高いパフォーマンスを実現。</p>
                         <div class="work-images">
-                            <img src="asset/picture/app1.png">
-                            <img src="asset/picture/app2.png">
-                            <img src="asset/picture/app3.png">
+                            <img src="asset/picture/app1.png" alt="スマートフォンアプリの検索画面" loading="lazy">
+                            <img src="asset/picture/app2.png" alt="スマートフォンアプリの詳細画面" loading="lazy">
+                            <img src="asset/picture/app3.png" alt="スマートフォンアプリのマップ画面" loading="lazy">
                         </div>
                         <div class="work-tags">
                             <span class="tag">Next.js</span>
@@ -144,7 +169,7 @@
                         <p class="work-desc">ローカルPCで動作する専用AIエージェントの開発支援。Web検索、ファイル操作、アプリケーション操作など、ユーザーの代わりに様々なタスクを自動化する。
                         </p>
                         <div class="work-images">
-                            <img src="asset/picture/personal_agent.png" alt="パーソナルエージェント開発支援">
+                            <img src="asset/picture/personal_agent.png" alt="パーソナルエージェント開発支援" loading="lazy">
                         </div>
                         <div class="work-tags">
                             <span class="tag">Python</span>
@@ -157,7 +182,7 @@
                         <h3 class="work-title">生成AI活用SaaS開発支援</h3>
                         <p class="work-desc">研究開発機関向けの生成AI活用SaaSベンチャー企業の立ち上げを支援。</p>
                         <div class="work-images">
-                            <img src="asset/picture/gen_ai_saas.png" alt="生成AI活用SaaS開発支援">
+                            <img src="asset/picture/gen_ai_saas.png" alt="生成AI活用SaaS開発支援" loading="lazy">
                         </div>
                         <div class="work-tags">
                             <span class="tag">AWS</span>
@@ -169,7 +194,7 @@
                         <h3 class="work-title">ホームページ作成</h3>
                         <p class="work-desc">個人・法人向けのホームページ作成。ランディングページからECサイトの作成まで幅広く対応。</p>
                         <div class="work-images">
-                            <img src="asset/picture/homepage_creation.jpg" alt="ホームページ作成">
+                            <img src="asset/picture/homepage_creation.jpg" alt="ホームページ作成" loading="lazy">
                         </div>
                         <div class="work-tags">
                             <span class="tag">AWS</span>
@@ -182,7 +207,7 @@
                         <p class="work-desc">業務支援Webアプリケーションの開発。業務支援ツールの作成や既存システムの改修など、幅広く対応。</p>
                         <p class="work-desc small">*IT補助金対象となる場合がございますのでお気軽にご相談ください</p>
                         <div class="work-images">
-                            <img src="asset/picture/web_app_dev.jpg" alt="Webアプリケーション開発">
+                            <img src="asset/picture/web_app_dev.jpg" alt="Webアプリケーション開発" loading="lazy">
                         </div>
                         <div class="work-tags">
                             <span class="tag">AWS</span>
