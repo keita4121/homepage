@@ -688,7 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         { name: '📧 メールアドレス', value: data.email },
                         { name: '📝 メッセージ', value: data.message },
                     ],
-                    footer: { text: '両儀システムズ | お問い合わせフォーム' },
+                    footer: { text: '両儀システムソリューションズ | お問い合わせフォーム' },
                     timestamp: new Date().toISOString(),
                 });
                 btn.textContent = '送信しました！';
